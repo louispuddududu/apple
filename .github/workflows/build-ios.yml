@@ -14,8 +14,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
+      - run: npm install --legacy-peer-deps
+      - run: npm install capacitor-native-biometric --legacy-peer-deps
       - run: npx cap add ios
+      - name: Permesso Face ID
+        run: /usr/libexec/PlistBuddy -c "Add :NSFaceIDUsageDescription string 'Wallet Demo usa Face ID per proteggere i dati della carta'" ios/App/App/Info.plist
       - run: npx cap sync ios
       - name: Build (senza firma)
         run: |
