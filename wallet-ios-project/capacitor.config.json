@@ -1,6 +1,6 @@
 {
   "appId": "com.example.walletdemo",
-  "appName": "Wallet Demo",
+  "appName": "Wallet",
   "webDir": "www",
   "backgroundColor": "#000000",
   "ios": { "contentInset": "never" }
