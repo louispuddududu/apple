@@ -3,6 +3,9 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+defaults:
+  run:
+    working-directory: wallet-ios-project
 jobs:
   build:
     runs-on: macos-15
@@ -27,4 +30,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: WalletDemo-ipa
-          path: WalletDemo.ipa
+          path: wallet-ios-project/WalletDemo.ipa
