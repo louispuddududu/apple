@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wallet – prototipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+ --bg:#000;--sheet:#1c1c1e;--cell:#2c2c2e;--cell-dark:#1c1c1e;--sep:rgba(255,255,255,.14);
+ --text:#fff;--text2:#8e8e93;--blue:#0a84ff;--btn:#0a8cff;--red:#ff453a;--green:#30d158;
+ --glass:rgba(38,38,40,.78);--glass-b:rgba(255,255,255,.12);
+ --tan:#c2b5a3;--tan-d:#645a50;--tan-sub:#a79d90;
+ --card-a:#0000ff;--card-b:#2342ff;
+ --t-red:#f26b61;--t-yellow:#fdc41f;--t-green:#4cb84a;--t-blue:#3d98d1;--t-grey:#8e8f94;--t-brown:#a38355;--cat:#f6bd20;
+ --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Inter,"Segoe UI",Roboto,sans-serif;
+ --fs-title:22px;--fs-body:17px;--fs-sub:15px;--fs-cap:13px;--scale:1;
+ --r-sheet:48px;--r-group:26px;--r-card:24px;--r-pill:999px;--r-tile:20px;
+ --m:16px;--ease:cubic-bezier(.32,.72,0,1);
+}
+:root[data-theme=light]{--bg:#f2f2f7;--sheet:#f2f2f7;--cell:#fff;--text:#000;--text2:#6c6c70;--sep:rgba(0,0,0,.14);--glass:rgba(255,255,255,.8);--glass-b:rgba(0,0,0,.08)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:#1a1a1a;color:var(--text);font-family:var(--font);display:flex;gap:28px;justify-content:center;align-items:flex-start;flex-wrap:wrap;padding:20px;min-height:100vh}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+svg{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.phone{width:402px;height:874px;max-width:100%;background:var(--bg);border-radius:56px;border:9px solid #333;position:relative;overflow:hidden;flex:none;font-size:calc(var(--fs-body)*var(--scale))}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:20px;z-index:99;display:grid;place-items:center;color:#aaa;font-size:15px}
+.status{position:absolute;top:0;left:0;right:0;height:54px;display:flex;justify-content:space-between;align-items:center;padding:6px 38px 0 44px;font-weight:600;font-size:16px;z-index:98;pointer-events:none}
+.status .r{display:flex;gap:6px;align-items:center;font-size:14px}.batt{background:#fff;color:#000;border-radius:6px;padding:0 5px;font-weight:700;font-size:13px}
+.layer{position:absolute;inset:0;background:var(--bg);overflow:hidden}
+.scroll{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none}.scroll::-webkit-scrollbar{display:none}
+.sheet{top:62px;border-radius:var(--r-sheet) var(--r-sheet) 0 0;background:var(--sheet);animation:up .45s var(--ease)}
+.layer.full{animation:up .45s var(--ease)}
+.scrim{background:rgba(0,0,0,.5);animation:fade .3s}
+@keyframes up{from{transform:translateY(100%)}}@keyframes fade{from{opacity:0}}
+@keyframes pop{from{opacity:0;transform:scale(.6);transform-origin:top right}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.page{position:absolute;inset:0;background:var(--sheet);animation:slide .4s var(--ease)}@keyframes slide{from{transform:translateX(30%);opacity:0}}
+/* header */
+.hdr{position:absolute;top:0;left:0;right:0;height:104px;display:flex;justify-content:space-between;align-items:center;padding:18px 16px 0;z-index:5;pointer-events:none}
+.hdr>*{pointer-events:auto}.hdr h2{position:absolute;left:0;right:0;top:34px;text-align:center;font-size:17px;font-weight:700;pointer-events:none}
+.gb{height:43px;min-width:43px;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--glass-b);display:grid;place-items:center;padding:0 16px;font-weight:600;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);font-size:22px}
+.gb.t{font-size:17px}.gb.c{padding:0}.gb.sq{padding:0 12px}
+.gg{display:flex;gap:2px;border-radius:var(--r-pill);background:var(--glass);border:1px solid var(--glass-b)}.gg .gb{background:none;border:0;padding:0 14px}
+.body{padding:104px 0 110px}
+/* type */
+.lead{padding:0 32px;font-size:calc(22px*var(--scale));line-height:1.28;font-weight:600;color:var(--text2)}.lead b{color:var(--text);font-weight:700}
+.h2{font-size:calc(22px*var(--scale));font-weight:800;padding:0 32px;margin:30px 0 10px;display:flex;justify-content:space-between;align-items:baseline}.h2 a{color:var(--blue);font-size:17px;font-weight:600;cursor:pointer}
+.sub{color:var(--text2);font-size:calc(var(--fs-sub)*var(--scale));font-weight:500}
+/* groups */
+.grp{margin:0 var(--m) 28px;background:var(--cell);border-radius:var(--r-group);overflow:hidden}
+.row{display:flex;align-items:center;gap:14px;padding:12px 16px;position:relative;width:100%;text-align:left;min-height:54px}
+.row+.row::before{content:"";position:absolute;top:0;right:0;left:16px;height:1px;background:var(--sep)}
+.row .mid{flex:1;min-width:0}.row .mid b{display:block;font-weight:600;font-size:calc(17px*var(--scale));line-height:1.25}
+.row .chev{color:#636366;font-size:16px;flex:none}.row .amt{font-weight:500;flex:none;align-self:flex-start;margin-top:1px}
+.row .amt s{color:var(--text2)}
+.red{color:var(--red);font-size:calc(15px*var(--scale));font-weight:500}
+.ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:#fff;font-size:20px;flex:none}
+.thumb{width:36px;height:46px;border-radius:4px;flex:none}
+.note{margin:-18px 32px 24px;color:var(--text2);font-size:calc(15px*var(--scale));font-weight:500;line-height:1.35}.note a{color:var(--blue)}
+/* toggle */
+.tg{width:51px;height:31px;border-radius:99px;background:#39393d;position:relative;flex:none;transition:background .2s}.tg::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.3);transition:transform .2s}
+.tg[aria-checked=true]{background:var(--green)}.tg[aria-checked=true]::after{transform:translateX(20px)}
+/* search bar */
+.sbar{position:absolute;left:24px;right:24px;bottom:24px;display:flex;gap:10px;z-index:6}
+.sf{flex:1;height:54px;border-radius:99px;background:var(--glass);border:1px solid var(--glass-b);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--text2);font-size:19px}
+.sf input{flex:1;background:none;border:0;outline:0;color:var(--text);font:inherit;font-size:19px;min-width:0}.sf input::placeholder{color:var(--text2)}.sf svg{color:var(--text);font-size:21px}
+.sbar .gb{height:54px;min-width:54px}
+/* primary */
+.cta{position:absolute;left:32px;right:32px;bottom:34px;height:52px;border-radius:99px;background:var(--btn);color:#7fffff;color:#d6fbff;font-weight:700;font-size:20px;box-shadow:0 0 0 1px #29b6ff inset}
+/* hero (onboarding) */
+.hero{height:222px;background:linear-gradient(#3a3a3c,var(--sheet));position:relative;display:flex;justify-content:center;border-radius:var(--r-sheet) var(--r-sheet) 0 0}
+.hero .phn{position:absolute;top:40px;width:240px;bottom:0;background:var(--sheet);border-radius:36px 36px 0 0;border:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;align-items:center}
+.hero .pc{margin-top:14px;width:221px;height:139px;border-radius:9px;position:relative;overflow:hidden;transition:opacity .8s}.hero .fid{margin-top:22px;color:var(--blue);font-size:38px;stroke-width:1.8}
+.priv{padding:0 32px;margin-top:26px;color:var(--text2);font-size:calc(14px*var(--scale));line-height:1.45;font-weight:500}.priv i{display:block;color:var(--blue);font-size:30px;margin-bottom:6px}.priv a{color:var(--blue)}
+.mk{position:absolute;right:12px;bottom:10px;width:40px;height:26px}.mk i{position:absolute;width:26px;height:26px;border-radius:50%}
+/* banner & card */
+.banner{margin:0 20px;border-radius:30px;overflow:hidden;position:relative;display:block;width:calc(100% - 40px);text-align:left}
+.art{background:var(--tan);height:210px;position:relative}.tk{position:absolute;width:86px;height:80px;border-radius:7px;display:grid;place-items:center;color:#fff;font-size:34px}
+.bf{background:var(--tan-d);padding:14px 16px;display:flex;justify-content:space-between;gap:10px;align-items:center}.bf b{display:block;font-size:calc(20px*var(--scale))}.bf span{color:var(--tan-sub);font-size:calc(17px*var(--scale));line-height:1.25;font-weight:500;display:block}
+.pill{background:rgba(255,255,255,.3);color:#e8e2d9;border-radius:99px;padding:9px 20px;font-weight:700;flex:none}
+.bx{position:absolute;top:16px;width:43px;height:43px;border-radius:50%;display:grid;place-items:center;font-size:22px;background:rgba(255,255,255,.3);color:#e8e2d9;z-index:3}
+.card{width:100%;border-radius:var(--r-card);background:radial-gradient(90% 90% at 8% 70%,var(--card-a),var(--card-b));padding:20px;position:relative;color:#fff;aspect-ratio:1.6;display:block;text-align:left;box-shadow:0 0 36px rgba(30,40,255,.4)}
+.card .br{font-size:34px;font-weight:700;letter-spacing:-1.8px}.card .tg2{position:absolute;top:22px;right:22px;font-size:14px;font-weight:700;color:rgba(255,255,255,.65)}
+.card .pan{position:absolute;bottom:18px;left:20px;font-weight:600;font-size:18px;letter-spacing:.5px}
+.card .mc{position:absolute;bottom:14px;right:18px;width:78px;height:50px}.mc i{position:absolute;width:50px;height:50px;border-radius:50%}.mc i:first-child{left:0;background:#eb001b}.mc i:last-child{right:0;background:#f79e1b;opacity:.92}.mc u{position:absolute;left:14px;top:0;width:22px;height:50px;background:#ff5f00;border-radius:50%/50%;mix-blend-mode:normal;opacity:.9}
+/* menu */
+.menu{position:absolute;top:96px;right:12px;width:290px;border-radius:34px;background:rgba(48,46,46,.8);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border:1px solid rgba(120,120,255,.25);padding:8px 0;animation:pop .35s var(--ease);z-index:50}
+.mi{display:flex;gap:16px;align-items:center;padding:12px 22px;width:100%;text-align:left}.mi svg{font-size:26px;flex:none;width:28px}.mi b{font-weight:500;font-size:19px;line-height:1.15;display:block}.mi small{color:var(--text2);font-size:17px;font-weight:500}
+.mi+.sp{height:1px;background:var(--sep);margin:6px 22px}
+/* search page tiles */
+.tiles{display:flex;gap:12px;padding:0 20px;overflow-x:auto;scrollbar-width:none}.tile{flex:none;width:90px;text-align:center;font-size:calc(15px*var(--scale));font-weight:500}.tile i{display:grid;place-items:center;width:90px;height:90px;border-radius:var(--r-tile);font-size:44px;margin-bottom:8px;font-style:normal;color:#fff}
+.sg{display:flex;gap:14px;align-items:center;padding:14px 32px;border-bottom:1px solid var(--sep);font-size:19px;width:100%;text-align:left;margin-left:0}.sg svg{font-size:22px}
+/* face id hud */
+.hud{position:absolute;left:50%;top:14px;transform:translateX(-50%);width:140px;height:140px;border-radius:44px;background:#000;display:grid;place-items:center;z-index:120;animation:pop .35s var(--ease);box-shadow:0 0 0 1px #222}
+.hud svg{font-size:78px;stroke-width:1.6;color:var(--green)}.hud.scan svg{animation:pulse .7s infinite alternate}@keyframes pulse{to{opacity:.35}}
+/* lock/pay */
+.lock{background:#000}.glow{box-shadow:0 0 44px rgba(30,40,255,.55)}
+.ring{width:80px;height:80px;border-radius:50%;border:4px solid #0a9bff;display:grid;place-items:center;color:#0a84ff;font-size:44px;margin:0 auto}
+.ok{width:96px;height:96px;border-radius:50%;background:var(--green);display:grid;place-items:center;font-size:56px;color:#fff;margin:0 auto;animation:pop .5s var(--ease)}.ok svg{stroke-width:3.2}
+.toast{position:absolute;left:24px;right:24px;bottom:40px;background:#3a3a3c;border-radius:16px;padding:14px 16px;font-size:15px;z-index:200;animation:fade .25s}
+/* side panel */
+.panel{width:340px;max-width:100%;background:#242426;border-radius:20px;padding:20px;font-size:14px;line-height:1.45;color:#eee}
+.panel h2{font-size:18px;margin-bottom:8px}.panel .b{display:block;width:100%;text-align:left;background:#3a3a3c;border-radius:12px;padding:10px 12px;margin:6px 0}
+.fake{background:#3a2a00;color:#ffd479;border-radius:12px;padding:10px 12px;margin-top:12px;font-size:13px}
+.fi{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--text);font:inherit;text-align:right}select.fi{direction:rtl}input[type=color]{width:44px;height:30px;border:0;background:none;padding:0;flex:none}input[type=file].fi{font-size:14px;color:var(--text2)}.del{color:var(--red);font-weight:600;font-size:15px;padding:6px 4px}body.native{padding:0;display:block;background:#000}.native .phone{width:100vw;height:100dvh;max-width:none;border:0;border-radius:0}.native .panel,.native .status,.native .island{display:none}@media(max-width:440px){body{padding:0}.phone{border:0;border-radius:0;height:100dvh;width:100vw}.panel{display:none}}
+</style></head>
+<body>
+<div class="phone" id="ph"><div class="island" id="isl"></div><div class="status"><span id="clk">16:12</span><span class="r"><span>4G</span><span class="batt">48</span></span></div><div id="root" class="layer"></div></div>
+<aside class="panel">
+ <h2>Prototipo Wallet</h2>
+ <p>Tocca come nell'app vera. Percorso: <b>+</b>, ricerca, <b>…</b>, banner Biglietti, carta, tasto <b>123</b>.</p>
+ <button class="b" id="sidebtn">🔒 Fuori dall'app: premi tasto laterale (schermata pagamento)</button>
+ <button class="b" id="thm">☀︎/☾ Tema chiaro/scuro</button>
+ <button class="b" id="dt">Aa Dynamic Type</button>
+ <div class="fake"><b>Simulato / placeholder:</b> Face ID, NFC e pagamento (finti, solo animazione); carte Maestro/Amex/Account e miniature biglietti sono segnaposto senza loghi; icone disegnate a mano al posto di SF Symbols; numero carta mostrato dopo "123" è inventato; voci "Pagamenti pre-autorizzati" e "Inserimento automatico" non hanno schermata negli screenshot, quindi non ne ho inventata una.</div>
+</aside>
+<script>
+const $=(s,r=document)=>r.querySelector(s),root=$('#root'),ph=$('#ph');
+const P=(d,o={})=>`<svg viewBox="0 0 24 24"${o.s?` style="stroke-width:${o.s}"`:''}>${d}</svg>`;
+const I={x:P('<path d="M6 6l12 12M18 6L6 18"/>',{s:2.8}),back:P('<path d="M15 5l-7 7 7 7"/>',{s:2.8}),chev:P('<path d="M9 5l7 7-7 7"/>',{s:2.6}),
+ plus:P('<path d="M12 4v16M4 12h16"/>',{s:2.8}),search:P('<circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/>',{s:2.8}),
+ dots:P('<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',{s:3}),
+ mic:P('<rect x="9" y="3" width="6" height="11" rx="3" style="fill:currentColor"/><path d="M5 11a7 7 0 0014 0M12 18v3M8 21h8"/>'),
+ box:P('<path d="M12 3l8 4v10l-8 4-8-4V7zM4 7l8 4 8-4M12 11v10"/>'),eur:P('<path d="M4 10a8 8 0 112 6"/><path d="M4 5v5h5M14 9.5a3 3 0 100 5M10 11.5h4M10 13h3"/>'),
+ kb:P('<rect x="2" y="7" width="18" height="11" rx="3"/><path d="M6 12.5h.1M10 12.5h.1M14 12.5h.1M18 4l3 3-6 6"/>'),
+ cgear:P('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'),lock:P('<circle cx="11" cy="12" r="8"/><path d="M11 7v5l3 2"/>'),bell:P('<path d="M6 16V11a6 6 0 1112 0v5l2 2H4zM10 20.5a2 2 0 004 0"/>'),
+ n123:P('<rect x="2" y="5" width="20" height="12" rx="3"/><path d="M2 9h20"/>'),face:P('<path d="M4 8V6a2 2 0 012-2h2M16 4h2a2 2 0 012 2v2M20 16v2a2 2 0 01-2 2h-2M8 20H6a2 2 0 01-2-2v-2M9 9v2M15 9v2M12 9v3M9 15c2 1.5 4 1.5 6 0"/>',{s:1.7}),
+ plane:P('<path d="M3 13l8-2-3-7h2l6 7 5-1c1 0 1 2 0 2l-5 1-6 7H8l3-7-8-1z" style="fill:currentColor;stroke-width:.5"/>'),bag:P('<rect x="4" y="9" width="16" height="11" rx="2" style="fill:currentColor;opacity:.9"/><path d="M8 9V7a4 4 0 018 0v2"/>'),
+ shirt:P('<path d="M8 4l-5 4 2 3 3-1v10h8V10l3 1 2-3-5-4a4 4 0 01-8 0z" style="fill:currentColor"/>'),bld:P('<path d="M5 21V4h9v17M14 9h5v12M8 8h2M8 12h2M8 16h2M17 13h.1M17 17h.1" />'),
+ check:P('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),card:P('<rect x="3" y="6" width="18" height="12" rx="3" style="fill:currentColor"/><path d="M3 10h18" style="stroke:#0a84ff"/>'),
+ train:P('<rect x="6" y="3" width="12" height="14" rx="3" style="fill:currentColor"/><path d="M8 21l2-4M16 21l-2-4"/>'),acc:P('<circle cx="12" cy="12" r="9" style="fill:currentColor"/>'),
+ wal:P('<rect x="3" y="6" width="18" height="13" rx="3" style="fill:currentColor"/><path d="M3 10h18" style="stroke:#000"/>'),
+ shake:P('<circle cx="8" cy="7" r="3" style="fill:currentColor"/><circle cx="16" cy="7" r="3" style="fill:currentColor;opacity:.7"/><path d="M3 17c2-4 5-4 7-2l2 1 2-1c2-2 5-2 7 2" style="fill:currentColor"/>'),
+ phone:P('<rect x="7" y="3" width="10" height="18" rx="3" style="fill:currentColor;opacity:.35"/>'),lock:P('<rect x="6" y="11" width="12" height="9" rx="2" style="fill:currentColor"/><path d="M8 11V8a4 4 0 018 0v3"/>')};
+/* ===== dati mock + service ===== */
+const DEF=[{id:'c1',name:'Revolut',tag:'VIRTUAL',last4:'1469',full:'5375 4112 0000 1469',c1:'#0000ff',c2:'#2342ff',fg:'#ffffff',net:'mc',img:''}];
+function load(){try{const x=localStorage.getItem('wallet.cards');if(x)return JSON.parse(x)}catch(e){}return JSON.parse(JSON.stringify(DEF))}
+function save(){try{localStorage.setItem('wallet.cards',JSON.stringify(DB.cards));return 1}catch(e){return 0}}
+let cur='c1';
+const DB={cards:load(),
+ tx:[["Cona Donatella Tabacchi","Venerdì","6,80"],["Conad","Giovedì","14,98"],["OVS","Giovedì","78,83"],["Vinted","01/10/26","12,22",1],["Vinted","01/10/26","11,14"],["Vinted","01/10/26","11,14"],["Frigo Tecnica","01/10/26","3,10"],["Conad","28/09/26","24,98"],["Crai","28/09/26","5,94"],["Zara","27/09/26","90,05"]],
+ expired:[["Ticket","Biglietto evento, Quartucciu, Sard…","9 nov 2025","#111"],["CAG ✈ LIN","Carta d’imbarco","15 ott 2024","#0a6fd6"],["CAG ✈ LIN","Carta d’imbarco","15 ott 2024","#0a6fd6"]],
+ transit:[["Carta dei trasporti di Canton","Canton","linear-gradient(#f5a623,#e8891a)"],["Carta dei trasporti di Changsha","Changsha","linear-gradient(#2a5d9a,#5aa0d8)"],["Carta dei trasporti di Changzhou","Changzhou","linear-gradient(#9cd3f0,#5ab0e0)"],["Carta dei trasporti di Chaozhou","Chaozhou","linear-gradient(#2fb4c8,#53c15a)"],["Carta dei trasporti di Chongqing","Chongqing","linear-gradient(#d9d0e8,#e9a0c0)"],["Carta dei trasporti di Dalian","Dalian","linear-gradient(#3b6fb5,#8ab6e0)"]]};
+const svc={cards:()=>DB.cards,card:()=>DB.cards.find(c=>c.id===cur)||DB.cards[0],tx:()=>DB.tx};
+/* ===== componenti ===== */
+const GB=(a,i,c='')=>`<button class="gb c ${c}" data-a="${a}" aria-label="${a}">${i}</button>`;
+const Hdr=(l,t,r='')=>`<div class="hdr">${l}${t?`<h2>${t}</h2>`:''}${r||'<span></span>'}</div>`;
+const Row=(o)=>`<button class="row" ${o.a?`data-a="${o.a}"`:''}>${o.ico||''}<span class="mid"><b>${o.t}</b>${o.s?`<span class="sub">${o.s}</span>`:''}</span>${o.r||''}${o.chev===false?'':`<span class="chev">${I.chev}</span>`}</button>`;
+const TxRow=(t,ex='')=>`<button class="row" style="align-items:flex-start;padding:14px 16px"><span class="mid"><b>${t[0]}</b><span class="sub" style="display:block">${t[3]?'<span class="red">Rifiutato</span>':'Apple Pay'}</span><span class="sub" style="display:block">${t[1]}${ex}</span></span><span class="amt">${t[3]?`<s>${t[2]} €</s>`:t[2]+' €'}</span><span class="chev" style="margin-top:3px">${I.chev}</span></button>`;
+const Toggle=(on=1)=>`<span class="tg" role="switch" tabindex="0" aria-checked="${!!on}" data-a="tg"></span>`;
+const SBar=(ph,close=1,val='')=>`<div class="sbar"><label class="sf">${I.search}<input placeholder="${ph}" aria-label="${ph}" value="${val}" oninput="filt(this.value)">${I.mic}</label>${close?GB('close',I.x):''}</div>`;
+const Card=(c,full,act)=>`<button class="card" data-a="${act||'card:'+c.id}" aria-label="Carta ${c.name} ${c.tag||''} termina con ${c.last4}" style="${c.img?`background:linear-gradient(rgba(0,0,0,.12),rgba(0,0,0,.12)),url('${c.img}') center/cover`:`background:radial-gradient(90% 90% at 8% 70%,${c.c1},${c.c2})`};color:${c.fg};box-shadow:0 0 36px ${c.c1}66"><div class="br">${c.name}</div><div class="tg2" style="color:${c.fg};opacity:.7">${c.tag||''}</div><div class="pan">${full?c.full:'•••• '+c.last4}</div>${c.net==='mc'?'<div class="mc"><i></i><i></i></div>':''}</button>`;
+const Tickets=()=>{const T=(c,x,y,r,i)=>`<div class="tk" style="background:var(--${c});left:${x}px;top:${y}px;transform:rotate(${r}deg)">${i}</div>`;
+ return T('t-red',24,36,-6,'♪')+T('t-yellow',146,16,0,'☕')+T('t-green',250,34,6,'🎬')+T('t-blue',146,104,0,'🎁')+T('t-grey',38,112,-6,I.plane)+T('t-brown',248,112,-6,'🎓')};
+/* ===== schermate ===== */
+const S={};
+S.home=()=>`<div class="scroll"><div style="height:62px"></div>
+ <div style="display:flex;justify-content:space-between;align-items:center;padding:24px 20px 20px"><h1 style="font-size:calc(35px*var(--scale));font-weight:800;letter-spacing:-.5px">Wallet</h1>
+ <div style="display:flex;gap:12px">${GB('add',I.plus)}<div class="gg"><button class="gb c" data-a="search" aria-label="Cerca">${I.search}</button><button class="gb c" data-a="menu" aria-label="Altro">${I.dots}</button></div></div></div>
+ <div id="ban"><button class="banner" data-a="tickets" aria-label="Biglietti"><div class="art">${Tickets()}</div><div class="bf"><div><b>Biglietti</b><span>Trova le app e salva i biglietti in un unico posto.</span></div><span class="pill">Ottieni</span></div></button><span class="bx" style="right:34px;top:142px" data-a="hideban" role="button" aria-label="Chiudi" onclick="event.stopPropagation()">${I.x}</span><div style="height:37px"></div></div>
+ <div style="padding:0 24px 60px">${svc.cards().map((c,i)=>`<div style="margin-top:${i?-128:0}px;position:relative;z-index:${i}">${Card(c)}</div>`).join('')}</div></div>`;
+S.add=()=>`<div class="scroll"><div class="body"><div class="lead" style="margin-top:44px"><b>Aggiungi a Wallet</b> Conserva tutti i biglietti, le chiavi e le carte che usi ogni giorno in un unico posto.</div><div style="height:34px"></div>
+ <div class="grp" style="border-radius:30px"><div class="row" style="padding:16px"><span class="ico" style="background:#000;border:1px solid #333">${I.wal}</span><span class="mid"><b>Carte trovate per te</b><span class="sub">Da altri dispositivi</span></span><span style="width:24px;height:24px;border:3px solid #666;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite"></span></div></div>
+ <div class="grp" style="border-radius:30px">${Row({ico:`<span class="ico" style="background:#2f9bff">${I.card}</span>`,t:'Carta di debito o credito',a:'p:debit'})}${Row({ico:`<span class="ico" style="background:#34c759">${I.train}</span>`,t:'Carta trasporti',a:'p:transit'})}</div>
+ <div class="grp" style="border-radius:30px">${Row({ico:`<span class="ico" style="background:#fff;color:#4fa8ff">${I.acc}</span>`,t:'Aggiungi Apple Account',a:'p:acct'})}</div></div></div>${Hdr(GB('close',I.x))}`;
+const Onb=(hero,t,txt,pr)=>`<div class="scroll"><div class="hero"><div class="phn">${hero}<span class="fid">${I.face}</span></div></div>
+ <div class="lead" style="margin-top:34px"><b>${t}</b> ${txt}</div><div class="priv"><i>${I.shake}</i>${pr} <a>Scopri come vengono gestiti i tuoi dati…</a></div><div style="height:130px"></div></div>
+ ${Hdr(GB('back',I.back))}<button class="cta" data-a="toast:Aggiunta carta simulata (nessun dato reale)">Continua</button>`;
+S.debit=()=>Onb(`<div class="pc" id="pc1" style="background:linear-gradient(#f4f4f4,#ccc)"><div class="mk"><i style="background:#e30613"></i><i style="left:14px;background:#00a1e4;opacity:.85"></i></div></div><div class="pc" id="pc2" style="position:absolute;top:14px;background:linear-gradient(135deg,#8cc7a8,#4b8f72);opacity:0"><span style="position:absolute;bottom:8px;left:10px;font-size:12px;color:#fff">•••• 9112</span></div>`,
+ 'Carta di debito o credito','Quando arriva il momento di pagare, non serve tirare fuori la carta. Basta usare iPhone o Apple Watch per acquistare online, nelle app e nei negozi che accettano pagamenti contactless.','Le informazioni relative alla carta, alla posizione, alle impostazioni e all’utilizzo del dispositivo potrebbero essere inviate e utilizzate, insieme alle informazioni sul conto, per fornire valutazioni all’ente che ha emesso la carta o alla rete di pagamento per configurare il pagamento e impedire frodi durante le transazioni.');
+S.acct=()=>Onb(`<div class="pc" style="background:#fafafa;margin-top:88px;height:150px;display:grid;place-items:center;position:relative"><b style="position:absolute;top:6px;left:8px;color:#000;font-size:16px">Account</b><div style="width:70px;height:70px;border-radius:50%;background:linear-gradient(#a56bff,#19c2ff)"></div></div>`,
+ 'Account','Usa il saldo del conto per acquistare app, giochi, musica e altro ancora.','Quando aggiungi un biglietto, questo viene associato al tuo account. Per consentire la configurazione e la gestione, il dispositivo potrebbe condividere con il fornitore del biglietto un identificativo unico del dispositivo.');
+S.transit=()=>`<div class="scroll"><div class="body" style="padding-top:96px"><div class="lead"><b>Carta trasporti</b> Accedi con rapidità ai trasporti avvicinando iPhone a un lettore.</div>
+ <div class="h2" style="color:var(--text2);margin-top:26px">Canada</div><div class="grp">${Row({ico:'<span class="thumb" style="width:46px;height:30px;background:#000;border:1px solid #444"></span>',t:'PRESTO',s:'Area metropolitana di Toronto'})}</div>
+ <div class="h2" style="color:var(--text2)">Cina continentale</div><div class="grp">${DB.transit.map(t=>Row({ico:`<span class="thumb" style="width:46px;height:30px;background:${t[2]}"></span>`,t:t[0],s:t[1]})).join('')}</div></div></div>${Hdr(GB('back',I.back))}${SBar('Cerca',0)}`;
+S.search=()=>`<div class="scroll" style="padding-top:70px"><div class="h2" style="margin-top:6px">Suggerimenti</div>
+ ${['Carte di pagamento','Transazioni','Ordini'].map(s=>`<button class="sg">${I.search}${s}</button>`).join('')}
+ <div class="h2" id="rec">Recenti<a data-a="card">Vedi tutto</a></div><div class="grp" id="recl">${svc.tx().slice(0,3).map(t=>TxRow(t,' - Revolut Mastercard')).join('')}</div>
+ <div class="h2">Categorie</div><div class="tiles"><div class="tile"><i style="background:var(--cat)">${I.bag}</i>Acquisti</div></div>
+ <div class="h2" style="margin-top:34px">Esercenti</div><div class="tiles" id="ese">${[['Vinted','#00929b','V'],['Conad','#a9c3e5',I.bld],['Cona Donatella…','var(--cat)',I.bag],['OVS','var(--cat)',I.shirt],['Frigo Tecnica','#a9c3e5',I.bld]].map(e=>`<div class="tile"><i style="background:${e[1]};font-weight:800;font-size:56px">${e[2]}</i>${e[0]}</div>`).join('')}</div><div style="height:130px"></div></div>${SBar('Cerca in Wallet')}`;
+S.orders=()=>`<div class="scroll"><div class="body"><div class="h2" style="color:var(--text2);margin-top:30px;padding-left:36px">2026</div><div class="grp">${Row({ico:`<span class="ico" style="width:56px;height:56px;background:#fff;color:#000;border-radius:12px;font-size:28px">${I.box}</span>`,t:'Giugno',s:'1 ordine'})}</div></div></div>${Hdr(GB('close',I.x),'Ordini')}${SBar('Cerca',0)}`;
+S.expired=()=>`<div class="scroll"><div class="body"><div class="grp">${DB.expired.map(e=>Row({ico:`<span class="thumb" style="background:${e[3]}"></span>`,t:e[0],s:e[1]+'<br>'+e[2]})).join('')}</div><div class="note" style="margin-top:-14px">Gestisci i biglietti scaduti in <a>impostazioni di Wallet e Apple Pay.</a></div></div></div>${Hdr(`<button class="gb t" data-a="toast:Modifica: nessuna schermata negli screenshot">Modifica</button>`,'Scaduti',GB('close',I.x))}`;
+S.notif=()=>`<div class="scroll"><div class="body" style="padding-top:116px">
+ <div class="grp" style="border-radius:34px">${Row({t:'Transazioni',a:'toast:Schermata Transazioni non presente negli screenshot'})}</div>
+ <div class="grp" style="border-radius:34px">${Row({t:'Ordini',r:Toggle(),chev:false})}</div>
+ <div class="grp" style="border-radius:34px">${Row({t:'Pagamenti pre-autorizzati',r:Toggle(),chev:false})}</div><div class="note">Ricevi notifiche relative ai prossimi pagamenti.</div>
+ <div class="grp" style="border-radius:34px">${Row({t:'Nuove funzionalità e aggiornamenti',r:Toggle(),chev:false})}</div>
+ <div class="grp" style="border-radius:34px">${Row({t:'Offerte e promozioni',r:Toggle(),chev:false})}</div></div></div>${Hdr(GB('close',I.x),'Notifiche')}`;
+S.tickets=()=>`<div class="scroll" style="background:#000"><div style="background:var(--tan);height:480px;position:relative"><div style="position:absolute;left:50%;top:150px;transform:translateX(-50%) scale(1.02);width:340px;height:200px">${Tickets()}</div></div>
+ <div class="bf" style="margin-top:-90px;position:relative;padding:14px 16px"><div><b>Biglietti</b><span>Trova le app e salva i biglietti in un unico posto.</span></div><span class="pill">Ottieni</span></div>
+ <p style="padding:34px 20px;color:#8e8e93;font-size:calc(28px*var(--scale));line-height:1.28;font-weight:500;font-size:22px">Conserva le carte d’imbarco, i biglietti del cinema, i buoni sconto e le carte fedeltà in un unico posto e mostrali nella schermata di blocco quando ti occorrono.</p></div>
+ <button class="bx" style="left:16px;top:62px;background:#5a4a35;color:#fff" data-a="close" aria-label="Chiudi">${I.x}</button>`;
+S.card=()=>`<div class="scroll" id="cs"><div style="padding:104px 20px 0">${Card(svc.card(),sessionStorage_ok?1:0,'face')}</div><div class="h2" style="margin-top:34px;padding-left:34px">Ultimi movimenti</div><div class="grp" style="margin:0 20px;border-radius:30px">${svc.tx().map(t=>TxRow(t)).join('')}</div><div style="height:50px"></div></div>
+ ${Hdr(GB('close',I.x),'',`<div style="display:flex;gap:12px"><button class="gb c" data-a="face" aria-label="Mostra dati carta">${I.n123}</button><div class="gg"><button class="gb c" data-a="search">${I.search}</button><button class="gb c" data-a="menu">${I.dots}</button></div></div>`)}`;
+let sessionStorage_ok=0;
+const nd=()=>({id:'c'+Date.now(),name:'La mia carta',tag:'VIRTUAL',last4:'0000',full:'',c1:'#7a2cff',c2:'#ff2d87',fg:'#ffffff',net:'mc',img:''});
+let draft=nd();
+const FAKES=[{name:'Banca Demo',tag:'DEBIT',last4:'4242',c1:'#2b2b30',c2:'#55555e',fg:'#ffffff',net:'mc'},{name:'Viaggi Gold',tag:'CREDIT',last4:'7788',c1:'#c9a227',c2:'#f3dc7a',fg:'#3a2a00',net:'none'},{name:'Verde Eco',tag:'VIRTUAL',last4:'3001',c1:'#0b6b4a',c2:'#35c28a',fg:'#ffffff',net:'mc'}];
+const mini=c=>`<span class="thumb" style="width:46px;height:30px;border-radius:5px;background:${c.img?`url('${c.img}') center/cover`:`linear-gradient(135deg,${c.c1},${c.c2})`}"></span>`;
+S.settings=()=>`<div class="scroll"><div class="body" style="padding-top:116px">
+ <div class="grp" style="border-radius:34px">${Row({t:'Aggiungi carta personalizzata',a:'p:newcard'})}${Row({t:'Aggiungi carte finte (demo)',a:'fakes',chev:false})}${Row({t:'Simula pagamento (tasto laterale)',a:'lockdemo',chev:false})}</div>
+ <div class="h2" style="color:var(--text2);font-size:calc(17px*var(--scale))">Le tue carte</div>
+ <div class="grp" style="border-radius:34px">${svc.cards().map(c=>Row({ico:mini(c),t:c.name,s:'•••• '+c.last4,r:`<span class="del" role="button" tabindex="0" data-a="del:${c.id}">Elimina</span>`,chev:false})).join('')}</div>
+ <div class="grp" style="border-radius:34px">${Row({t:'Ripristina carte iniziali',a:'reset',chev:false})}</div>
+ <div class="note">Le carte sono salvate solo su questo dispositivo (dati finti, nessun pagamento reale).</div></div></div>${Hdr(GB('close',I.x),'Impostazioni')}`;
+S.newcard=()=>`<div class="scroll"><div style="padding:104px 20px 0"><div id="prev" style="pointer-events:none">${Card(draft)}</div></div>
+ <div class="grp" style="margin:24px 16px 0;border-radius:30px">
+ <label class="row"><b style="font-weight:600">Nome</b><input class="fi" data-f="name" value="${draft.name}" maxlength="20"></label>
+ <label class="row"><b style="font-weight:600">Etichetta</b><input class="fi" data-f="tag" value="${draft.tag}" maxlength="10"></label>
+ <label class="row"><b style="font-weight:600">Ultime 4 cifre</b><input class="fi" data-f="last4" value="${draft.last4}" maxlength="4" inputmode="numeric"></label>
+ <label class="row"><b style="font-weight:600">Colore 1</b><span style="flex:1"></span><input type="color" data-f="c1" value="${draft.c1}"></label>
+ <label class="row"><b style="font-weight:600">Colore 2</b><span style="flex:1"></span><input type="color" data-f="c2" value="${draft.c2}"></label>
+ <label class="row"><b style="font-weight:600">Colore testo</b><span style="flex:1"></span><input type="color" data-f="fg" value="${draft.fg}"></label>
+ <label class="row"><b style="font-weight:600">Cerchi rete</b><select class="fi" data-f="net"><option value="mc"${draft.net==='mc'?' selected':''}>Sì</option><option value="none"${draft.net!=='mc'?' selected':''}>No</option></select></label>
+ <label class="row"><b style="font-weight:600">Immagine</b><input class="fi" type="file" accept="image/*" data-f="img"></label>
+ <button class="row" data-a="rmimg"><b style="font-weight:600;color:var(--red)">Rimuovi immagine</b></button></div><div style="height:140px"></div></div>
+ ${Hdr(GB('back',I.back),'Nuova carta')}<button class="cta" data-a="savecard">Aggiungi carta</button>`;
+const prev=()=>{const p=$('#prev');if(p)p.innerHTML=Card(draft)};
+const refresh=()=>{root.innerHTML=S.home();const st=sheets.find(x=>x.dataset.n==='settings');if(st)st.innerHTML=S.settings()};
+document.addEventListener('input',e=>{const f=e.target.dataset&&e.target.dataset.f;if(!f||f==='img'||f==='net')return;let v=e.target.value;if(f==='last4'){v=v.replace(/\D/g,'');e.target.value=v}draft[f]=v;prev()});
+document.addEventListener('change',e=>{const f=e.target.dataset&&e.target.dataset.f;if(f==='net'){draft.net=e.target.value;prev()}else if(f==='img'){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,900/im.width),cv=document.createElement('canvas');cv.width=im.width*k;cv.height=im.height*k;cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);draft.img=cv.toDataURL('image/jpeg',.8);prev()};im.src=r.result};r.readAsDataURL(file)}});
+const MenuEl=()=>`<div class="layer scrim" id="mscrim" data-a="closemenu" style="z-index:40"></div><div class="menu" id="menu">
+ <button class="mi" data-a="o:orders">${I.box}<b>Ordini</b></button><button class="mi" data-a="toast:Schermata non presente negli screenshot">${I.eur}<b>Pagamenti pre-autorizzati</b></button><div class="sp"></div>
+ <button class="mi" data-a="toast:Schermata non presente negli screenshot">${I.kb}<span><b>Inserimento automatico</b><small>2 carte</small></span></button>
+ <button class="mi" data-a="o:expired">${I.clock}<span><b>Scaduti</b><small>3 biglietti</small></span></button><div class="sp"></div><button class="mi" data-a="o:notif">${I.bell}<b>Notifiche</b></button><div class="sp"></div><button class="mi" data-a="o:settings">${I.gear}<span><b>Impostazioni</b><small>Carte personalizzate</small></span></button></div>`;
+/* ===== navigazione ===== */
+let sheets=[];
+function layer(html,cls){const d=document.createElement('div');d.className='layer '+cls;d.innerHTML=html;ph.appendChild(d);return d}
+const sheet=(n,full)=>{const d=layer(S[n](),full?'full':'sheet');d.dataset.n=n;sheets.push(d);hap();return d};
+const push=n=>{const t=sheets[sheets.length-1],p=document.createElement('div');p.className='page';p.innerHTML=S[n]();t.appendChild(p);hap();if(n==='debit')alt()};
+let altT;function alt(){clearInterval(altT);let k=0;altT=setInterval(()=>{const a=$('#pc2'),b=$('#pc1');if(!a)return clearInterval(altT);k^=1;a.style.opacity=k;b.style.opacity=1-k},2800)}
+function close(){const t=sheets.pop();if(t){t.style.transition='transform .35s var(--ease)';t.style.transform='translateY(100%)';setTimeout(()=>t.remove(),330)}}
+function back(el){const p=el.closest('.page');if(p){p.style.transition='.3s';p.style.transform='translateX(100%)';setTimeout(()=>p.remove(),280)}}
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;ph.appendChild(t);setTimeout(()=>t.remove(),2200)}
+const hap=(n=10)=>navigator.vibrate&&navigator.vibrate(n);
+function face(after){const h=document.createElement('div');h.className='hud scan';h.innerHTML=I.face;ph.appendChild(h);setTimeout(()=>{h.classList.remove('scan');h.innerHTML=I.check;hap([15,40,15])},1100);setTimeout(()=>{h.remove();after&&after()},1700)}
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a;
+ if(a==='add')sheet('add');else if(a==='search')sheet('search',1);else if(a==='tickets')sheet('tickets',1);else if(a==='card'||a.startsWith('card:')){if(a.includes(':'))cur=a.slice(5);sessionStorage_ok=0;sheet('card',1)}
+ else if(a==='close'){close()}else if(a==='back')back(el);
+ else if(a==='menu'){if($('#menu'))return;const w=document.createElement('div');w.innerHTML=MenuEl();[...w.children].forEach(c=>ph.appendChild(c))}
+ else if(a==='closemenu'){$('#menu')?.remove();$('#mscrim')?.remove()}
+ else if(a.startsWith('o:')){$('#menu')?.remove();$('#mscrim')?.remove();sheet(a.slice(2))}
+ else if(a.startsWith('p:')){if(a==='p:newcard')draft=nd();push(a.slice(2))}
+ else if(a.startsWith('toast:')){toast(a.slice(6));$('#menu')?.remove();$('#mscrim')?.remove()}
+ else if(a==='savecard'){if(!draft.name.trim())return toast('Inserisci un nome');draft.last4=(draft.last4+'0000').slice(0,4);draft.full='4000 1234 5678 '+draft.last4;DB.cards.push({...draft});if(!save())toast('Memoria piena: immagine troppo grande');else toast('Carta aggiunta');hap([10,30,10]);refresh()}
+ else if(a==='fakes'){FAKES.forEach((f,i)=>DB.cards.push({...f,id:'c'+Date.now()+i,full:'4000 1234 5678 '+f.last4,img:''}));save();toast('3 carte finte aggiunte');refresh()}
+ else if(a==='reset'){DB.cards=JSON.parse(JSON.stringify(DEF));save();toast('Carte ripristinate');refresh()}
+ else if(a==='rmimg'){draft.img='';prev()}
+ else if(a.startsWith('del:')){if(DB.cards.length<2)return toast('Serve almeno una carta');DB.cards=DB.cards.filter(c=>c.id!==a.slice(4));save();refresh()}
+ else if(a==='lockdemo'){$('#sidebtn').click()}
+ else if(a==='hideban'){$('#ban').remove()}
+ else if(a==='tg'){el.setAttribute('aria-checked',el.getAttribute('aria-checked')!=='true');hap(8)}
+ else if(a==='face'){face(()=>{sessionStorage_ok=1;const c=el.closest('.layer').querySelector('.card');if(c){c.querySelector('.pan').textContent=svc.card().full;c.classList.add('glow')}})}
+});
+function filt(v){v=v.toLowerCase();const rl=$('#recl');if(!rl)return;rl.innerHTML=svc.tx().filter(t=>t[0].toLowerCase().includes(v)).slice(0,3).map(t=>TxRow(t,' - Revolut Mastercard')).join('')||'<div class="row sub">Nessun risultato</div>'}
+/* ===== schermata di blocco / pagamento (simulata) ===== */
+$('#sidebtn').onclick=()=>{const d=layer(`<div class="island" style="z-index:130">${I.lock}</div><div style="padding:50px 22px 0;text-align:center"><div style="height:46px"></div>${Card(svc.card()).replace('class="card"','class="card glow" style="pointer-events:none"')}<div id="st" style="margin-top:60px;color:#0a84ff">${I.face.replace('<svg','<svg style="width:70px;height:70px"')}</div><p id="stp" style="margin-top:20px;color:#8e8e93;font-size:22px;font-weight:600">Face ID…</p></div>`,'lock full');
+ d.style.zIndex=90;
+ setTimeout(()=>{$('#st',d).innerHTML=`<button class="ring" aria-label="Avvicina al lettore (simula)">${I.phone}</button>`;$('#stp',d).textContent='Avvicina il dispositivo al lettore';hap(12)},1300);
+ d.addEventListener('click',e=>{if(e.target.closest('.ring')){$('#st',d).innerHTML=`<div class="ok">${I.check}</div>`;$('#stp',d).textContent='Fatto (simulato)';hap([20,50,20]);setTimeout(()=>d.remove(),1800)}else if(e.target===d||e.target.id==='stp')d.remove()})};
+/* ===== setup ===== */
+if(window.Capacitor){document.body.classList.add('native');try{Capacitor.Plugins.StatusBar.setStyle({style:'DARK'})}catch(e){}}
+root.innerHTML=S.home();
+const ck=()=>{const d=new Date();$('#clk').textContent=d.toTimeString().slice(0,5)};ck();setInterval(ck,30000);
+$('#thm').onclick=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==='light'?'dark':'light'};
+let si=0;$('#dt').onclick=()=>{si=(si+1)%3;document.documentElement.style.setProperty('--scale',[1,1.15,1.3][si])};
+</script></body></html>
