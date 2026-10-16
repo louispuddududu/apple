@@ -3,38 +3,46 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-defaults:
-  run:
-    working-directory: wallet-ios-project
+# Il progetto Expo sta nella radice del repository.
+# Se lo metti in una cartella (es. "wallet-expo"), aggiungi qui sotto:
+# defaults:
+#   run:
+#     working-directory: wallet-expo
 jobs:
   build:
     runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      CI: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
       - run: npm install --legacy-peer-deps
-      - run: npm install capacitor-native-biometric --legacy-peer-deps
-      - run: npx cap add ios
-      - name: Icona
-        run: |
-          f=$(ls ios/App/App/Assets.xcassets/AppIcon.appiconset/*.png | head -1)
-          sips -s format png -z 1024 1024 icon.jpg --out "$f"
-      - name: Permesso Face ID
-        run: /usr/libexec/PlistBuddy -c "Add :NSFaceIDUsageDescription string 'Wallet Demo usa Face ID per proteggere i dati della carta'" ios/App/App/Info.plist
-      - run: npx cap sync ios
+      # Genera il progetto iOS nativo. Il permesso Face ID e le notifiche
+      # arrivano dai plugin in app.json, quindi non serve PlistBuddy.
+      - name: Genera progetto iOS
+        run: npx expo prebuild --platform ios
       - name: Build (senza firma)
         run: |
-          cd ios/App
-          if [ -d App.xcworkspace ]; then TARGET="-workspace App.xcworkspace"; else TARGET="-project App.xcodeproj"; fi
-          xcodebuild $TARGET -scheme App -configuration Release -sdk iphoneos \
+          cd ios
+          if [ -d *.xcworkspace ]; then
+            WORKSPACE=$(ls -d *.xcworkspace | head -1)
+            TARGET="-workspace $WORKSPACE"
+            SCHEME="${WORKSPACE%.xcworkspace}"
+          else
+            PROJECT=$(ls -d *.xcodeproj | head -1)
+            TARGET="-project $PROJECT"
+            SCHEME="${PROJECT%.xcodeproj}"
+          fi
+          xcodebuild $TARGET -scheme "$SCHEME" -configuration Release -sdk iphoneos \
             -destination 'generic/platform=iOS' -archivePath "$PWD/build/App.xcarchive" \
             archive -quiet CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
           mkdir -p Payload
-          cp -R build/App.xcarchive/Products/Applications/App.app Payload/
-          zip -qry ../../WalletDemo.ipa Payload
+          cp -R build/App.xcarchive/Products/Applications/*.app Payload/
+          zip -qry ../Wallet.ipa Payload
       - uses: actions/upload-artifact@v4
         with:
-          name: WalletDemo-ipa
-          path: wallet-ios-project/WalletDemo.ipa
+          name: Wallet-ipa
+          path: Wallet.ipa
