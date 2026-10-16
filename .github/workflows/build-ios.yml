@@ -4,14 +4,10 @@ on:
   push:
     branches: [main]
 # Il progetto Expo sta nella radice del repository.
-# Se lo metti in una cartella (es. "wallet-expo"), aggiungi qui sotto:
-# defaults:
-#   run:
-#     working-directory: wallet-expo
 jobs:
   build:
     runs-on: macos-15
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       CI: "1"
     steps:
@@ -19,15 +15,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Usa l'Xcode più recente disponibile
+        run: |
+          XC=$(ls -d /Applications/Xcode_*.app | grep -vi beta | sort -V | tail -1)
+          echo "Uso $XC"
+          sudo xcode-select -s "$XC"
+          xcodebuild -version
+
       - run: npm install --legacy-peer-deps
-      # Genera il progetto iOS nativo. Il permesso Face ID e le notifiche
-      # arrivano dai plugin in app.json, quindi non serve PlistBuddy.
+
+      # Genera il progetto iOS nativo. Face ID e notifiche arrivano dai plugin in app.json.
       - name: Genera progetto iOS
         run: npx expo prebuild --platform ios
-      - name: Build (senza firma)
+
+      # In modalità CI Expo non installa i Pods: lo facciamo noi
+      - name: Installa i Pods
         run: |
           cd ios
-          if [ -d *.xcworkspace ]; then
+          pod install
+
+      - name: Build (senza firma)
+        run: |
+          set -o pipefail
+          cd ios
+          if ls -d *.xcworkspace >/dev/null 2>&1; then
             WORKSPACE=$(ls -d *.xcworkspace | head -1)
             TARGET="-workspace $WORKSPACE"
             SCHEME="${WORKSPACE%.xcworkspace}"
@@ -38,10 +50,25 @@ jobs:
           fi
           xcodebuild $TARGET -scheme "$SCHEME" -configuration Release -sdk iphoneos \
             -destination 'generic/platform=iOS' -archivePath "$PWD/build/App.xcarchive" \
-            archive -quiet CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+            archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            2>&1 | tee ../build.log
           mkdir -p Payload
           cp -R build/App.xcarchive/Products/Applications/*.app Payload/
           zip -qry ../Wallet.ipa Payload
+
+      # Se qualcosa fallisce, mostra in fondo le righe di errore
+      - name: Mostra gli errori
+        if: failure()
+        run: grep -nE "error:|ARCHIVE FAILED|failed with a nonzero" build.log | head -40 || true
+
+      - name: Salva il log completo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          if-no-files-found: ignore
+
       - uses: actions/upload-artifact@v4
         with:
           name: Wallet-ipa
