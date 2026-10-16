@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Wallet",
+    "slug": "wallet-clone",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#000000",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.tuonome.wallet"
+    },
+    "plugins": [
+      "expo-sensors",
+      "expo-notifications",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow Wallet to use Face ID to confirm payments."
+        }
+      ]
+    ]
+  }
+}
