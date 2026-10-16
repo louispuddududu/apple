@@ -25,6 +25,10 @@ jobs:
 
       - run: npm install --legacy-peer-deps
 
+      # Reanimated 4 richiede react-native-worklets (la versione giusta la sceglie Expo)
+      - name: Installa react-native-worklets
+        run: npx expo install react-native-worklets -- --legacy-peer-deps
+
       # Genera il progetto iOS nativo. Face ID e notifiche arrivano dai plugin in app.json.
       - name: Genera progetto iOS
         run: npx expo prebuild --platform ios
